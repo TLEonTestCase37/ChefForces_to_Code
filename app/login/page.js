@@ -4,13 +4,13 @@ import { useState, useEffect } from "react";
 import { Monoton } from "next/font/google";
 import { motion } from "framer-motion";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/firebase/firebaseConfig";
+import { auth } from "../../firebase/firebaseConfig";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 const monoton = Monoton({
   subsets: ["latin"],
   weight: "400",
-});
+}); 
 import Image from "next/image";
 const Login = () => {
   const [showPassword, setShowPassword] = useState(true);
