@@ -12,6 +12,7 @@ const Navbar = () => {
     { label: "Home", path: "/dashboard" },
     { label: "Problems", path: "/problems" },
     { label: "Profile", path: "/profile" },
+    { label: "Contests", path: "/contest" },
   ];
 
   return (
