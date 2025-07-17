@@ -76,9 +76,9 @@ export default function LandingPage() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
-                <Code className="h-6 w-6 text-white" />
+                <Code className="h-6 w-6 text-white cursor-pointer" href="/" />
               </div>
-              <span className="text-2xl font-bold text-white">CodeCraft</span>
+              <span className="text-2xl font-bold text-white">ChefForces toCode</span>
             </div>
 
             {/* Desktop Navigation */}
@@ -88,9 +88,6 @@ export default function LandingPage() {
               </a>
               <a href="#about" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">
                 About
-              </a>
-              <a href="#services" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">
-                Services
               </a>
               <a href="#news" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">
                 News
@@ -123,9 +120,6 @@ export default function LandingPage() {
                 </a>
                 <a href="#about" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">
                   About
-                </a>
-                <a href="#services" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">
-                  Services
                 </a>
                 <a href="#news" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">
                   News
@@ -187,7 +181,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Why Choose <span className="text-blue-400">CodeCraft</span>?
+              Why Choose <span className="text-blue-400">ChefForces toCode</span>?
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               We combine innovation, expertise, and passion to deliver exceptional digital solutions that drive your
@@ -306,7 +300,7 @@ export default function LandingPage() {
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
                   <Code className="h-6 w-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold text-white">CodeCraft</span>
+                <span className="text-2xl font-bold text-white">ChefForces toCode</span>
               </div>
               <p className="text-gray-400 mb-4 max-w-md">
                 Crafting exceptional digital experiences through innovative development solutions and cutting-edge
@@ -343,9 +337,9 @@ export default function LandingPage() {
             <div>
               <h3 className="text-white font-semibold mb-4">Contact</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>hello@codecraft.dev</li>
-                <li>+1 (555) 123-4567</li>
-                <li>San Francisco, CA</li>
+                <li>amankumarsingh2904@gmail.com</li>
+                <li>Dial 100</li>
+                <li>Varanasi, UP, India</li>
               </ul>
             </div>
           </div>

@@ -2,20 +2,40 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Menu, X, Code, Home, Trophy, User, Bell } from "lucide-react"
+import { Menu, X, Code, Home, Trophy, User, Bell, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { auth } from "@/firebase/firebaseConfig"
+import { onAuthStateChanged, signOut } from "firebase/auth"
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [scrollY, setScrollY] = useState(0)
+  const [user, setUser] = useState(null)
   const router = useRouter()
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user)
+    })
+    return () => unsubscribe()
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY)
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      router.push("/login")
+      setIsMenuOpen(false)
+    } catch (err) {
+      console.error("Logout failed:", err)
+    }
+  }
 
   const navItems = [
     {
@@ -74,18 +94,28 @@ export default function Navbar() {
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
             </button>
 
-            {/* User Profile Button */}
+            {/* User Section */}
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full flex items-center justify-center">
                 <User className="h-4 w-4 text-white" />
               </div>
-              <Button
-                variant="outline"
-                className="border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white bg-transparent"
-                onClick={() => router.push("/profile")}
-              >
-                Dashboard
-              </Button>
+              {user ? (
+                <Button
+                  variant="outline"
+                  className="border-red-400 text-red-400 hover:bg-red-400 hover:text-white bg-transparent"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white bg-transparent"
+                  onClick={() => router.push("/login")}
+                >
+                  Login
+                </Button>
+              )}
             </div>
           </div>
 
@@ -134,6 +164,16 @@ export default function Navbar() {
                   </div>
                   <span>My Profile</span>
                 </button>
+
+                {user && (
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center space-x-3 text-red-300 hover:text-red-500 transition-colors duration-200 p-2 rounded-lg hover:bg-red-500/10 w-full mt-3"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Logout</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
