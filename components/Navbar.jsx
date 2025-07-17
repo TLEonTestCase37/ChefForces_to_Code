@@ -69,7 +69,7 @@ export default function Navbar() {
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
               <Code className="h-6 w-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-white">CodeCraft</span>
+            <span className="text-2xl font-bold text-white">ChefForces toCode</span>
           </div>
 
           {/* Desktop Navigation */}

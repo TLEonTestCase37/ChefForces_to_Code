@@ -45,7 +45,7 @@ const Login = () => {
           <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
             <Code className="h-7 w-7 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-white">CodeCraft</h1>
+          <h1 className="text-4xl font-bold text-white">ChefForces toCode</h1>
         </div>
         <p className="text-gray-300 text-center text-lg">Please Enter your Credentials</p>
 
