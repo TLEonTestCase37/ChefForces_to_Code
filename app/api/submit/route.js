@@ -1,8 +1,8 @@
 export async function POST(req) {
   const { code, language_id, stdin, expected_output } = await req.json();
+
   const submission = await fetch(
     "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
-
     {
       method: "POST",
       headers: {
@@ -20,6 +20,7 @@ export async function POST(req) {
     }
   );
   if (!submission.ok) {
+    console.log(submission);
     return Response.json(
       { error: "Failed to submit code to Judge0" },
       { status: 500 }

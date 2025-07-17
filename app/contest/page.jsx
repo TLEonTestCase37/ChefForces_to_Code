@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar";
 import { useRouter } from "next/navigation";
+import { Loader } from "@/components/Loader";
+import Link from "next/link";
 
 const Contest = () => {
   const [contestCode, setContestCode] = useState("");
@@ -15,8 +17,8 @@ const Contest = () => {
         const res = await fetch("/api/contests");
         const text = await res.text();
         const data = text ? JSON.parse(text) : [];
-
         setContests(data);
+        console.log(data);
       } catch (err) {
         console.error("Failed to fetch problems:", err);
         setContests([]);
@@ -33,11 +35,18 @@ const Contest = () => {
           <h2 className="text-xl font-bold text-amber-300 mb-4">
             📅 Contest List
           </h2>
-          <ul>
-            {contests.map((contest, index) => {
-              return <li key={contest.name}>{contest.name}</li>;
-            })}
-          </ul>
+          {!loading && (
+            <ul>
+              {contests.map((contest, index) => {
+                return (
+                  <li key={contest.name} className="border-2 border-white">
+                    <Link href={`/contest/${contest._id}`}>{contest.name}</Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {loading && <Loader />}
         </div>
 
         {/* Top Right Panel */}

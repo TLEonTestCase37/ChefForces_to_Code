@@ -1,8 +1,12 @@
+import { Skeleton } from "./ui/skeleton";
 export function Loader() {
-    return (
-      <div className="flex justify-center items-center h-20">
-        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
+  return (
+    <>
+      <Skeleton className="h-12 w-12 rounded-full" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" />
       </div>
-    );
-  }
-  
+    </>
+  );
+}
