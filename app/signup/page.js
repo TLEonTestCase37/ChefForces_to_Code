@@ -4,15 +4,11 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { auth } from "@/firebase/firebaseConfig";
-import { Monoton } from "next/font/google";
-const monoton = Monoton({
-  subsets: ["latin"],
-  weight: "400",
-});
+import { EyeOff,Eye,Code } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+
 const Register = () => {
-  const router =useRouter();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -24,26 +20,31 @@ const Register = () => {
         password
       );
       const user = result.user;
-      console.log('Sign-up Successfull');
-      router.push('/dashboard');
+      console.log("Sign-up Successfull");
+      router.push("/dashboard");
     } catch (err) {
       console.log(err.message);
       window.alert(err.message);
     }
   };
   return (
-    <div className="flex items-center justify-center h-screen w-screen bg-[#0f0f0f]">
+    <div className="flex items-center justify-center min-h-screen w-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
-        className="bg-[#1A1A1A] w-[90%] max-w-md p-8 rounded-2xl shadow-2xl flex flex-col items-center gap-6"
+        className="bg-slate-800/60 backdrop-blur-md border border-slate-600 w-[90%] max-w-md p-8 rounded-2xl shadow-2xl flex flex-col items-center gap-6"
       >
-        <h1
-          className={`${monoton.className} text-[#FFA116] text-2xl text-center`}
-        >
+        <div className="flex items-center space-x-2 mb-2">
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
+            <Code className="h-7 w-7 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold text-white">ChefForces toCode</h1>
+        </div>
+
+        <p className="text-gray-300 text-center text-lg">
           Please Enter your Credentials
-        </h1>
+        </p>
 
         <form
           onSubmit={(e) => {
@@ -58,7 +59,7 @@ const Register = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="bg-[#2A2A2A] text-white placeholder-gray-400 h-12 rounded-xl px-4 focus:outline-none focus:ring-2 focus:ring-[#FFA116] transition"
+            className="bg-slate-700/50 text-white placeholder-gray-400 h-12 rounded-xl px-4 focus:outline-none focus:ring-2 focus:ring-blue-400 transition border border-slate-600"
           />
 
           <div className="relative w-full">
@@ -68,30 +69,34 @@ const Register = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="bg-[#2A2A2A] text-white placeholder-gray-400 h-12 rounded-xl px-4 pr-12 w-full focus:outline-none focus:ring-2 focus:ring-[#FFA116] transition"
+              className="bg-slate-700/50 text-white placeholder-gray-400 h-12 rounded-xl px-4 pr-12 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition border border-slate-600"
             />
-            <Image
-              src={!showPassword ? "/eye-off.svg" : "/eye.svg"}
-              alt="Toggle password visibility"
-              width={24}
-              height={24}
-              className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-white"
+            <div
+              className="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-blue-400 transition-colors"
               onClick={() => setShowPassword(!showPassword)}
-            />
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </div>
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             type="submit"
-            className="bg-[#FFA116] text-black font-semibold h-12 rounded-xl transition hover:bg-yellow-400"
+            className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold h-12 rounded-xl transition hover:from-blue-600 hover:to-cyan-500 shadow-md"
           >
             Sign Up
-          </motion.button>
+          </button>
         </form>
-        <div className="text-white flex justify-around w-full">
-          <div>Already have an account??</div>
-          <Link href={"/login"} className="hover:underline">
+
+        <div className="text-gray-300 flex flex-col sm:flex-row justify-center items-center gap-2 w-full text-sm">
+          <span>Already have an account?</span>
+          <Link
+            href="/login"
+            className="text-blue-400 hover:underline font-medium"
+          >
             Login
           </Link>
         </div>

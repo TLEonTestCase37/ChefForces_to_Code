@@ -86,7 +86,7 @@ const Dashboard = () => {
                 <p className="text-gray-400">Master coding challenges and level up your skills</p>
               </div>
             </div>
-            <Button className="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white">
+            <Button className="bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white cursor-pointer">
               <Trophy className="h-4 w-4 mr-2" />
               View Progress
             </Button>

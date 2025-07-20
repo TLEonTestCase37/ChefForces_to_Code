@@ -30,7 +30,6 @@ import { onAuthStateChanged } from "firebase/auth";
 const QuestionPage = () => {
   const { contestId, id } = useParams();
   const router = useRouter();
-
   const [loading, setLoading] = useState(true);
   const [question, setQuestion] = useState(null);
   const [userCode, setUserCode] = useState("");
@@ -38,22 +37,29 @@ const QuestionPage = () => {
   const [testResults, setTestResults] = useState([]);
   const [submitted, setSubmitted] = useState(false);
   const [tests, setTests] = useState([]);
+  const [curuserId, setCurUserId] = useState(null);
+  const [problemIndex, setProblemIndex] = useState(0);
+  const [startTime, setStarttime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
 
   useEffect(() => {
     const fetchData = async (user) => {
       try {
         const contestRes = await fetch(`/api/contests/${contestId}`);
         const contest = await contestRes.json();
-
         const now = Date.now();
         const start = new Date(contest.startTime).getTime();
         const end = new Date(contest.endTime).getTime();
-
+        // console.log(start);
         if (now < start || now > end) {
           router.push(`/contest/${contestId}/page`);
           return;
         }
-
+        setStarttime(start);
+        setEndTime(end);
+        const index = contest.problems.findIndex((pid) => pid === id);
+        // console.log(index);
+        setProblemIndex(index + 1);
         const questionRes = await fetch(`/api/problems/${id}`);
         const data = await questionRes.json();
         setQuestion(data);
@@ -71,6 +77,7 @@ const QuestionPage = () => {
         router.push(`/contest/${contestId}/page`);
         return;
       }
+      setCurUserId(curUser.uid);
       fetchData(curUser);
     });
 
@@ -78,10 +85,17 @@ const QuestionPage = () => {
   }, [contestId, id, router]);
 
   const handleSubmit = async () => {
+    const now = Date.now();
+    const start = startTime;
+    const end = endTime;
+    if (now < start || now > end) {
+      window.alert("Contest has Ended");
+      router.push("/dashboard");
+    }
     if (submitted || userCode.trim().length === 0) return;
     setSubmitted(true);
     setTestResults([]);
-
+    let accepted = true;
     try {
       const results = [];
       for (let i = 0; i < tests.length; i += 2) {
@@ -102,12 +116,29 @@ const QuestionPage = () => {
           verdict: data.error ? `❌ ${data.verdict}` : `✅ ${data.verdict}`,
           output: data.output || "",
         });
+        if (data.error) {
+          accepted = false;
+        }
       }
       setTestResults(results);
     } catch (err) {
       console.error("Submission failed:", err);
       alert("Error while submitting code");
     } finally {
+      if (accepted) {
+        await fetch("/api/contestsubmit", {
+          method: "POST",
+          body: JSON.stringify({
+            userId: curuserId,
+            contestId: contestId,
+            problemIndex: problemIndex,
+            timeTaken: (now - startTime) / 1000,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      }
       setSubmitted(false);
     }
   };
@@ -151,7 +182,9 @@ const QuestionPage = () => {
               <Code className="h-7 w-7 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">{question?.title}</h1>
+              <h1 className="text-3xl font-bold text-white">
+                {question?.title}
+              </h1>
               <div className="flex items-center space-x-4 mt-2">
                 <Badge className={getDifficultyColor(question?.difficulty)}>
                   {question?.difficulty}
@@ -175,20 +208,30 @@ const QuestionPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 text-gray-300">
-                <div className="whitespace-pre-line">{question?.description}</div>
+                <div className="whitespace-pre-line">
+                  {question?.description}
+                </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Sample Input</h3>
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    Sample Input
+                  </h3>
                   <Card className="bg-slate-900/60 border-slate-600">
                     <CardContent className="p-4">
-                      <pre className="text-green-300 font-mono text-sm">{question?.sampleTestCase}</pre>
+                      <pre className="text-green-300 font-mono text-sm">
+                        {question?.sampleTestCase}
+                      </pre>
                     </CardContent>
                   </Card>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Sample Output</h3>
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    Sample Output
+                  </h3>
                   <Card className="bg-slate-900/60 border-slate-600">
                     <CardContent className="p-4">
-                      <pre className="text-blue-300 font-mono text-sm">{question?.sampleOutput}</pre>
+                      <pre className="text-blue-300 font-mono text-sm">
+                        {question?.sampleOutput}
+                      </pre>
                     </CardContent>
                   </Card>
                 </div>
@@ -271,10 +314,15 @@ const QuestionPage = () => {
                 ) : (
                   <div className="space-y-4">
                     {testResults.map((result, index) => (
-                      <Card key={index} className="bg-slate-700/50 border-slate-600">
+                      <Card
+                        key={index}
+                        className="bg-slate-700/50 border-slate-600"
+                      >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-white">Test Case {index + 1}</h4>
+                            <h4 className="font-semibold text-white">
+                              Test Case {index + 1}
+                            </h4>
                             <div className="flex items-center">
                               {result.verdict.includes("✅") ? (
                                 <CheckCircle className="h-4 w-4 text-green-400 mr-1" />
@@ -294,7 +342,9 @@ const QuestionPage = () => {
                           </div>
                           {result.output && (
                             <div className="mt-2">
-                              <p className="text-sm text-gray-400 mb-1">Output:</p>
+                              <p className="text-sm text-gray-400 mb-1">
+                                Output:
+                              </p>
                               <pre className="bg-slate-900/60 p-2 rounded text-xs font-mono text-gray-300 overflow-x-auto">
                                 {result.output}
                               </pre>

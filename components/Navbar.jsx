@@ -78,7 +78,7 @@ export default function Navbar() {
               <button
                 key={item.name}
                 onClick={() => router.push(item.href)}
-                className="flex items-center space-x-2 text-gray-300 hover:text-blue-400 transition-colors duration-200 group"
+                className="cursor-pointer flex items-center space-x-2 text-gray-300 hover:text-blue-400 transition-colors duration-200 group"
               >
                 <span className="group-hover:scale-110 transition-transform duration-200">{item.icon}</span>
                 <span>{item.name}</span>
@@ -89,20 +89,17 @@ export default function Navbar() {
             ))}
 
             {/* Notifications */}
-            <button className="relative text-gray-300 hover:text-blue-400 transition-colors duration-200">
+            <button className="relative text-gray-300 hover:text-blue-400 transition-colors duration-200 cursor-pointer">
               <Bell className="h-5 w-5" />
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
             </button>
 
             {/* User Section */}
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
-              </div>
               {user ? (
                 <Button
                   variant="outline"
-                  className="border-red-400 text-red-400 hover:bg-red-400 hover:text-white bg-transparent"
+                  className="border-red-400 text-red-400 hover:bg-red-400 hover:text-white bg-transparent cursor-pointer"
                   onClick={handleLogout}
                 >
                   Logout
@@ -159,10 +156,7 @@ export default function Navbar() {
                   }}
                   className="flex items-center space-x-3 text-gray-300 hover:text-blue-400 transition-colors duration-200 p-2 rounded-lg hover:bg-slate-700/50 w-full"
                 >
-                  <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full flex items-center justify-center">
-                    <User className="h-3 w-3 text-white" />
-                  </div>
-                  <span>My Profile</span>
+              
                 </button>
 
                 {user && (
