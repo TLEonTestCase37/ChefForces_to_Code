@@ -1,41 +1,46 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Menu, X, Code, Home, Trophy, User, Bell, LogOut } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { auth } from "@/firebase/firebaseConfig"
-import { onAuthStateChanged, signOut } from "firebase/auth"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Menu, X, Code, Home, Trophy, User, Bell, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { auth } from "@/firebase/firebaseConfig";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [scrollY, setScrollY] = useState(0)
-  const [user, setUser] = useState(null)
-  const router = useRouter()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [user, setUser] = useState(null); 
+  const [curUserId, setCurUserId] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user)
-    })
-    return () => unsubscribe()
-  }, [])
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        setCurUserId(firebaseUser.uid);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY)
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLogout = async () => {
     try {
-      await signOut(auth)
-      router.push("/login")
-      setIsMenuOpen(false)
+      await signOut(auth);
+      router.push("/login");
+      setIsMenuOpen(false);
     } catch (err) {
-      console.error("Logout failed:", err)
+      console.error("Logout failed:", err);
     }
-  }
+  };
 
   const navItems = [
     {
@@ -49,27 +54,29 @@ export default function Navbar() {
       icon: <Trophy className="h-4 w-4" />,
       badge: "Live",
     },
-    {
-      name: "Profile",
-      href: "/profile",
-      icon: <User className="h-4 w-4" />,
-    },
-  ]
+  ];
 
   return (
     <nav
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrollY > 50 ? "bg-slate-900/95 backdrop-blur-md shadow-lg" : "bg-slate-900/80 backdrop-blur-sm"
+        scrollY > 50
+          ? "bg-slate-900/95 backdrop-blur-md shadow-lg"
+          : "bg-slate-900/80 backdrop-blur-sm"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
-          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => router.push("/dashboard")}>
+          <div
+            className="flex items-center space-x-2 cursor-pointer"
+            onClick={() => router.push("/dashboard")}
+          >
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
               <Code className="h-6 w-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-white">ChefForces toCode</span>
+            <span className="text-2xl font-bold text-white">
+              ChefForces toCode
+            </span>
           </div>
 
           {/* Desktop Navigation */}
@@ -80,13 +87,30 @@ export default function Navbar() {
                 onClick={() => router.push(item.href)}
                 className="cursor-pointer flex items-center space-x-2 text-gray-300 hover:text-blue-400 transition-colors duration-200 group"
               >
-                <span className="group-hover:scale-110 transition-transform duration-200">{item.icon}</span>
+                <span className="group-hover:scale-110 transition-transform duration-200">
+                  {item.icon}
+                </span>
                 <span>{item.name}</span>
                 {item.badge && (
-                  <Badge className="bg-red-500/20 text-red-300 border-red-500/30 text-xs">{item.badge}</Badge>
+                  <Badge className="bg-red-500/20 text-red-300 border-red-500/30 text-xs">
+                    {item.badge}
+                  </Badge>
                 )}
               </button>
             ))}
+
+            {/* Conditionally render Profile nav item if user is logged in */}
+            {user && (
+              <button
+                onClick={() => router.push(`/profile/${curUserId}`)}
+                className="cursor-pointer flex items-center space-x-2 text-gray-300 hover:text-blue-400 transition-colors duration-200 group"
+              >
+                <span className="group-hover:scale-110 transition-transform duration-200">
+                  <User className="h-4 w-4" />
+                </span>
+                <span>Profile</span>
+              </button>
+            )}
 
             {/* Notifications */}
             <button className="relative text-gray-300 hover:text-blue-400 transition-colors duration-200 cursor-pointer">
@@ -122,7 +146,11 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-300 hover:text-white transition-colors duration-200"
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
@@ -135,38 +163,38 @@ export default function Navbar() {
                 <button
                   key={item.name}
                   onClick={() => {
-                    router.push(item.href)
-                    setIsMenuOpen(false)
+                    router.push(item.href);
+                    setIsMenuOpen(false);
                   }}
                   className="flex items-center space-x-3 text-gray-300 hover:text-blue-400 transition-colors duration-200 p-2 rounded-lg hover:bg-slate-700/50"
                 >
                   {item.icon}
                   <span>{item.name}</span>
                   {item.badge && (
-                    <Badge className="bg-red-500/20 text-red-300 border-red-500/30 text-xs ml-auto">{item.badge}</Badge>
+                    <Badge className="bg-red-500/20 text-red-300 border-red-500/30 text-xs ml-auto">
+                      {item.badge}
+                    </Badge>
                   )}
                 </button>
               ))}
 
               <div className="border-t border-slate-600 pt-4">
-                <button
-                  onClick={() => {
-                    router.push("/profile")
-                    setIsMenuOpen(false)
-                  }}
-                  className="flex items-center space-x-3 text-gray-300 hover:text-blue-400 transition-colors duration-200 p-2 rounded-lg hover:bg-slate-700/50 w-full"
-                >
-              
-                </button>
-
-                {user && (
-                  <button
+                {user ? (
+                  <Button
+                    variant="outline"
+                    className="border-red-400 text-red-400 hover:bg-red-400 hover:text-white bg-transparent cursor-pointer"
                     onClick={handleLogout}
-                    className="flex items-center space-x-3 text-red-300 hover:text-red-500 transition-colors duration-200 p-2 rounded-lg hover:bg-red-500/10 w-full mt-3"
                   >
-                    <LogOut className="h-4 w-4" />
-                    <span>Logout</span>
-                  </button>
+                    Logout
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white bg-transparent"
+                    onClick={() => router.push("/login")}
+                  >
+                    Login
+                  </Button>
                 )}
               </div>
             </div>
@@ -174,5 +202,5 @@ export default function Navbar() {
         )}
       </div>
     </nav>
-  )
+  );
 }

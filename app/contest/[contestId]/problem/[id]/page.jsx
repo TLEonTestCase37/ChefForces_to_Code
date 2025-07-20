@@ -9,7 +9,6 @@ import {
   XCircle,
   Clock,
   AlertTriangle,
-  Terminal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -126,19 +125,65 @@ const QuestionPage = () => {
       alert("Error while submitting code");
     } finally {
       if (accepted) {
-        await fetch("/api/contestsubmit", {
-          method: "POST",
+        try {
+          const res = await fetch("/api/contestsubmit", {
+            method: "POST",
+            body: JSON.stringify({
+              userId: curuserId,
+              contestId: contestId,
+              problemIndex: problemIndex,
+              timeTaken: (now - startTime) / 1000,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!res.ok) {
+            const errorData = await res.json();
+            console.error("Submission failed:", errorData);
+            alert(`Failed to record contest submission: ${errorData.error}`);
+            return;
+          }
+
+          const data = await res.json();
+          // console.log("Contest submission recorded:", data);
+          alert("Contest submission recorded!");
+        } catch (error) {
+          console.error("Network error:", error);
+          alert("Something went wrong while submitting to the contest.");
+        }
+      }
+
+      try {
+        const res = await fetch(`/api/users/${curuserId}`, {
+          method: "PUT",
           body: JSON.stringify({
-            userId: curuserId,
-            contestId: contestId,
-            problemIndex: problemIndex,
-            timeTaken: (now - startTime) / 1000,
+            problemName: question?.title || "",
+            verdict: accepted ? "Accepted" : "Wrong Answer",
           }),
           headers: {
             "Content-Type": "application/json",
           },
         });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error("Update failed:", errorData);
+          // optional: show a toast
+          alert(`Failed to update: ${errorData.error}`);
+          return;
+        }
+
+        const data = await res.json();
+        console.log("Update success:", data);
+        // optional: toast or visual feedback
+        alert("Submission saved successfully!");
+      } catch (error) {
+        console.error("Network error:", error);
+        alert("Something went wrong. Please try again later.");
       }
+
       setSubmitted(false);
     }
   };

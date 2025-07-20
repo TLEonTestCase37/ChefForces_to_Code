@@ -13,7 +13,7 @@ export async function GET(req, { params }) {
     if (!contest) {
       return NextResponse.json({ error: "Contest Not Found" }, { status: 404 });
     }
-    contest._id= contest._id.toString();
+    contest._id = contest._id.toString();
     return NextResponse.json(contest);
   } catch (error) {
     console.log("Error fetching conteset", error);

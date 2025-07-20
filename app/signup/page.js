@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { auth } from "@/firebase/firebaseConfig";
-import { EyeOff,Eye,Code } from "lucide-react";
+import { EyeOff, Eye, Code } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Register = () => {
@@ -20,13 +20,43 @@ const Register = () => {
         password
       );
       const user = result.user;
-      console.log("Sign-up Successfull");
+      console.log("Sign-up Successful");
+
+      // Post the user data to your DB
+      try {
+        const res = await fetch("/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user.uid,
+            userEmail: user.email,
+            userSubmissions: [],
+            userSolvedCount: 0,
+          }),
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error("Failed to create user in DB:", errorData);
+          alert("Something went wrong while saving user data.");
+          return;
+        }
+
+        console.log("User data saved to MongoDB.");
+      } catch (error) {
+        console.error("Fetch error:", error);
+        alert("Failed to connect to server.");
+      }
+
       router.push("/dashboard");
     } catch (err) {
       console.log(err.message);
       window.alert(err.message);
     }
   };
+
   return (
     <div className="flex items-center justify-center min-h-screen w-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       <motion.div

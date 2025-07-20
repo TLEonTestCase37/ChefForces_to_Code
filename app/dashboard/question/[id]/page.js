@@ -37,10 +37,12 @@ const QuestionPage = () => {
   const [langId, setLangId] = useState(71);
   const [testResults, setTestResults] = useState([]);
   const [disable, setDisable] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (curUser) => {
       if (curUser) setDisable(false);
+      setUser(curUser.uid)
     });
     return () => unsub();
   }, []);
@@ -72,6 +74,7 @@ const QuestionPage = () => {
     }
     setSubmitted(true);
     setTestResults([]);
+    let accepted = true;
     try {
       const results = [];
       for (let i = 0; i < tests.length; i += 2) {
@@ -92,12 +95,41 @@ const QuestionPage = () => {
           verdict: data.error ? `❌ ${data.verdict}` : `✅ ${data.verdict}`,
           output: data.output || "",
         });
+        if (data.error) accepted = false;
       }
       setTestResults(results);
     } catch (err) {
       console.error("Submission failed:", err);
       window.alert("Error while submitting code");
     } finally {
+      try {
+        const res = await fetch(`/api/users/${user}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            problemName: question?.title || "",
+            verdict: accepted ? "Accepted" : "Wrong Answer",
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error("Update failed:", errorData);
+          // optional: show a toast
+          alert(`Failed to update: ${errorData.error}`);
+          return;
+        }
+
+        const data = await res.json();
+        console.log("Update success:", data);
+        // optional: toast or visual feedback
+        alert("Submission saved successfully!");
+      } catch (error) {
+        console.error("Network error:", error);
+        alert("Something went wrong. Please try again later.");
+      }
       setSubmitted(false);
     }
   };
@@ -163,8 +195,7 @@ const QuestionPage = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Panel - Problem Description */}
           <div className="flex flex-col">
             <Card className="bg-slate-800/60 border-slate-600 flex-1 overflow-hidden">
@@ -264,7 +295,7 @@ const QuestionPage = () => {
                   placeholder="Write your code here..."
                   className="flex-1 bg-slate-900/60 border-slate-600 text-white font-mono text-sm resize-none focus:border-blue-400 min-h-[300px] max-h-[400px] overflow-auto whitespace-pre"
                 />
-  
+
                 <div className="flex justify-end mt-4">
                   <Button
                     onClick={handleSubmit}
