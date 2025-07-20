@@ -20,7 +20,6 @@ export async function POST(req) {
     }
   );
   if (!submission.ok) {
-    console.log(submission);
     return Response.json(
       { error: "Failed to submit code to Judge0" },
       { status: 500 }

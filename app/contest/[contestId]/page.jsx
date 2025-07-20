@@ -1,42 +1,87 @@
-"use client"
+"use client";
 
-import Navbar from "@/components/Navbar"
-import { useParams, useRouter } from "next/navigation" // Import useRouter
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
-import { CalendarDays, Clock, Code, Info, Trophy, ExternalLink } from "lucide-react" // Added ExternalLink
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge" // Added Badge
+import Navbar from "@/components/Navbar";
+import { useParams, useRouter } from "next/navigation"; // Import useRouter
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  CalendarDays,
+  Clock,
+  Code,
+  Info,
+  Trophy,
+  ExternalLink,
+} from "lucide-react"; // Added ExternalLink
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge"; // Added Badge
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/firebase/firebaseConfig";
 
 const ContestPage = () => {
-  const { contestId } = useParams()
-  const router = useRouter() // Initialize useRouter
-  const [loading, setLoading] = useState(true)
-  const [contest, setContest] = useState(null)
+  const { contestId } = useParams();
+  const router = useRouter(); // Initialize useRouter
+  const [loading, setLoading] = useState(true);
+  const [contest, setContest] = useState(null);
+  const [user, setUser] = useState(null);
+  const now = new Date();
+  const isRunning =
+    contest &&
+    now >= new Date(contest.startTime) &&
+    now < new Date(contest.endTime);
+  const isRegistered = user && contest?.registeredUsers?.includes(user.uid);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+  const handleRegister = async () => {
+    try {
+      const res = await fetch(`/api/contests/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contestId,
+          userId: user.uid,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Update contest state
+        setContest((prev) => ({
+          ...prev,
+          registeredUsers: [...prev.registeredUsers, user.uid],
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to register", err);
+    }
+  };
 
   useEffect(() => {
     async function getContestData() {
-      setLoading(true)
+      setLoading(true);
       try {
-        const res = await fetch(`/api/contests/${contestId}`)
-        const data = await res.json()
-        setContest(data)
+        const res = await fetch(`/api/contests/${contestId}`);
+        const data = await res.json();
+        setContest(data);
       } catch (err) {
-        console.error("Failed to fetch contest", err)
+        console.error("Failed to fetch contest", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    if (contestId) getContestData()
-  }, [contestId])
+    if (contestId) getContestData();
+  }, [contestId]);
 
   const formatDate = (str) =>
     new Date(str).toLocaleString("en-IN", {
       dateStyle: "medium",
       timeStyle: "short",
-    })
+    });
 
   // If loading or contest data is not available, show a full-page skeleton
   if (loading || !contest) {
@@ -54,7 +99,7 @@ const ContestPage = () => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -70,7 +115,9 @@ const ContestPage = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">{contest.name}</h1>
-              <p className="text-gray-400">Created At: {formatDate(contest.createdAt)}</p>
+              <p className="text-gray-400">
+                Created At: {formatDate(contest.createdAt)}
+              </p>
             </div>
           </div>
         </div>
@@ -85,6 +132,32 @@ const ContestPage = () => {
                 <CardTitle className="text-white flex items-center">
                   <Info className="h-5 w-5 mr-2 text-blue-400" />
                   Contest Info
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    {user ? (
+                      isRunning ? (
+                        isRegistered ? (
+                          <div className="bg-green-600/10 text-green-400 border border-green-700 rounded-lg p-3 mb-4 text-sm">
+                            ✅ You are registered for this contest.
+                          </div>
+                        ) : (
+                          <Button
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium mb-4"
+                            onClick={handleRegister}
+                          >
+                            Register for Contest
+                          </Button>
+                        )
+                      ) : (
+                        <div className="bg-yellow-500/10 text-yellow-400 border border-yellow-600 rounded-lg p-3 mb-4 text-sm">
+                          ⚠️ The contest is not currently running.
+                        </div>
+                      )
+                    ) : (
+                      <div className="bg-red-500/10 text-red-400 border border-red-600 rounded-lg p-3 mb-4 text-sm">
+                        🔒 Please log in to register or participate.
+                      </div>
+                    )}
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-300">
@@ -92,7 +165,9 @@ const ContestPage = () => {
                   <CalendarDays className="h-4 w-4 text-gray-400" />
                   <div>
                     <span className="text-gray-400 text-sm">Start Time:</span>
-                    <p className="font-medium">{formatDate(contest.startTime)}</p>
+                    <p className="font-medium">
+                      {formatDate(contest.startTime)}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -107,7 +182,12 @@ const ContestPage = () => {
                   <div>
                     <span className="text-gray-400 text-sm">Duration:</span>
                     <p className="font-medium">
-                      {Math.floor((new Date(contest.endTime) - new Date(contest.startTime)) / 60000)} minutes
+                      {Math.floor(
+                        (new Date(contest.endTime) -
+                          new Date(contest.startTime)) /
+                          60000
+                      )}{" "}
+                      minutes
                     </p>
                   </div>
                 </div>
@@ -134,7 +214,13 @@ const ContestPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.05, duration: 0.2 }}
                         className="flex items-center justify-between p-4 rounded-lg bg-slate-700/50 border border-slate-600 hover:bg-slate-700/70 transition-all duration-200 cursor-pointer group"
-                        onClick={() => router.push(`/dashboard/question/${pid}`)}
+                        onClick={() => {
+                          if (isRunning && user) {
+                            router.push(`/contest/${contestId}/problem/${pid}`);
+                          } else {
+                            router.push(`/dashboard/question/${pid}`);
+                          }
+                        }}
                       >
                         <div className="flex items-center space-x-3">
                           <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
@@ -149,8 +235,8 @@ const ContestPage = () => {
                           size="icon"
                           className="text-gray-400 hover:text-blue-400"
                           onClick={(e) => {
-                            e.stopPropagation() // Prevent navigating to problem on button click
-                            router.push(`/dashboard/question/${pid}`)
+                            e.stopPropagation(); // Prevent navigating to problem on button click
+                            router.push(`/dashboard/question/${pid}`);
                           }}
                         >
                           <ExternalLink className="h-5 w-5" />
@@ -161,8 +247,12 @@ const ContestPage = () => {
                 ) : (
                   <div className="text-center py-8">
                     <Code className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-400">No problems added to this contest yet.</p>
-                    <p className="text-gray-500 text-sm">The contest creator might add them soon!</p>
+                    <p className="text-gray-400">
+                      No problems added to this contest yet.
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      The contest creator might add them soon!
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -171,7 +261,7 @@ const ContestPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ContestPage
+export default ContestPage;
